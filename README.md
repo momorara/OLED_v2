@@ -3,8 +3,11 @@
 
 OLED表示に関して、独自ライブラリを作りました。
 これにより
-luma.coreとluma.oledのインストールが不要となります。
-
+luma.coreとluma.oledのインストールが不要となります。<br>
+メリットとしては、<br>
+・インストールが簡単<br>
+・bookwormで仮想環境を使わなくてもインストールできる。<br>
+ただし、従来のライブラリと使い方の違いがあるので、現状で問題のない人には不要です。
 
 
 <h4><<概要>></h4>
@@ -30,26 +33,20 @@ luma.coreとluma.oledのインストールが不要となります。
 ・サーボモーターは付属しません。<br>
 
 <h4><<使用方法>></h4>
-git clone https://github.com/momorara/OLED<br>
+git clone https://github.com/momorara/OLED_v2 OLED<br>
 でラズパイにダウンロードしてください。<br>
 インストールについては、インストール文書に従いインストールを行ってください。<br>
-bullseyeまでと、Bookwormでインストール手順が違いますので、注意してください。
+bullseye、Bookwormでインストール手順は同じです。
 プログラムは同じもので動作します。
 
 <h4><<動作環境>></h4>
-2024/3/5 対応OS：Bullseye版11.9<br>
-2024/3/7 対応OS：Buster版10.13での動作を確認しています。<br>
-2024/4/16 対応OS：Bookworm版12.5での動作確認<br>
-2024/7/30 対応OS：Bullseye版11.10にて動作確認、Bookworm版12.6での動作確認<br>
-2025/1/5 対応OS：Bullseye版11.11にて動作確認<br>
-2025/1/7 対応OS：Bookworm版12.8にて動作確認<br>
+2025/1/　　 対応OS：Boolseye11.11 、　Bookworm12.8にて動作確認<br>
    
 <h4><<使用説明資料>></h4>
 説明書類の中の資料を確認ください。
 
 <h4><<アップデート>></h4>
-2024/07/30 説明資料を更新しました。<br>
+なし
 
 <h4><<サポート窓口>></h4>
-  メールアドレスが　tkj-works@mbr.nifty.com に変更になっています。<br>
-  資料等を修正中ですが、ご注意ください。<br>
+  メールアドレスは　tkj-works@mbr.nifty.com です。<br>
