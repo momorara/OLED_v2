@@ -45,8 +45,10 @@ bullseye、Bookwormでインストール手順は同じです。
 <h4><<使用説明資料>></h4>
 説明書類の中の資料を確認ください。
 
-<h4><<アップデート>></h4>
-なし
+<h4><<メンテナンス情報>></h4>
+既存のライブラリを使う場合は、
+git clone https://github.com/momorara/OLED
+を見てください。
 
 <h4><<サポート窓口>></h4>
   メールアドレスは　tkj-works@mbr.nifty.com です。<br>
