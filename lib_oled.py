@@ -1,67 +1,216 @@
-
-#!/usr/bin/python
-
 """
-###########################################################################
-# 外部ライブラリとしておいて、使う場合
+2025/01/23  luma.xxxを使わずにOLEDを使えるようにしました。
+            これにより、pipインストールが不要になります。
+            インストールが簡単になります
+            bookwormで仮想環境を使わず、OLEDを使えます。
+            ただし、billseyeでは、smbus2のインストールが必要になる場合があります。
 
-2024/03/03  start
-
-############################################################################
+            OLED 128*32専用です。
+    v2.0
 """
-
-from luma.core.interface.serial import i2c
-from luma.core.render import canvas
-from luma.oled.device import ssd1306
-from PIL import Image
+import smbus2
+from PIL import Image, ImageDraw, ImageFont
 import time
 
-# Raspberry Pi 4以降の場合、port=1を指定
-serial = i2c(port=1, address=0x3C)
+# OLEDディスプレイの設定
+OLED_I2C_ADDR = 0x3C
+OLED_WIDTH = 128
+OLED_HEIGHT = 32
 
-# その他の初期化パラメータを設定（必要に応じて）
-device = ssd1306(serial, width=128, height=32) # 必要に応じ64
+# SSD1306制御用コマンド
+SSD1306_COMMAND = 0x00
+SSD1306_DATA = 0x40
 
-# # OLEDにテキストを表示する例
-# with canvas(device) as draw:
-#     draw.text((0, 0), "Hello, OLED!", fill="white")
+image = Image.new("1", (OLED_WIDTH, OLED_HEIGHT), "black")
+draw = ImageDraw.Draw(image)
 
-def text(line1,line2,line3):
-    with canvas(device) as draw:
-        draw.text((0,  0), line1, fill="white")
-        draw.text((0, 11), line2, fill="white")
-        draw.text((0, 22), line3, fill="white")
+# SMBus初期化
+bus = smbus2.SMBus(1)
 
-from PIL import  ImageFont
-# テキストを描画
-def textTT(text,size):
-    # フォントを指定
-    font = ImageFont.truetype("fonts-japanese-gothic.ttf", size)
-    with canvas(device) as draw:
-        draw.text((0, 0), text, font=font, fill="white")
+def oled_command(cmd):
+    """OLEDにコマンドを送信"""
+    bus.write_byte_data(OLED_I2C_ADDR, SSD1306_COMMAND, cmd)
 
-def square(x1,y1,x2,y2,color):
-    if color == 0:
-        #矩形の描画:
-        with canvas(device) as draw:
-            draw.rectangle((x1,y1,x2,y2), outline="white",fill="black")
-    if color == 1:
-        #矩形の描画:
-        with canvas(device) as draw:
-            draw.rectangle((x1,y1,x2,y2), outline="white",fill="white")
+def oled_ini():
+    """OLEDを初期化"""
+    commands = [
+        0xAE,  # Display OFF
+        0x20, 0x00,  # Set Memory Addressing Mode to Horizontal
+        0xB0,  # Set Page Start Address for Page Addressing Mode
+        0xC8,  # Set COM Output Scan Direction
+        0x00,  # Set Low Column Address
+        0x10,  # Set High Column Address
+        0x40,  # Set Display Start Line
+        0x81, 0xFF,  # Set Contrast Control
+        0xA1,  # Set Segment Re-map
+        0xA6,  # Set Normal Display
+        0xA8, 0x1F,  # Set Multiplex Ratio (for 128x32)
+        0xD3, 0x00,  # Set Display Offset
+        0xD5, 0xF0,  # Set Display Clock Divide Ratio
+        0xD9, 0x22,  # Set Pre-charge Period
+        0xDA, 0x02,  # Set COM Pins Hardware Configuration
+        0xDB, 0x20,  # Set VCOMH Deselect Level
+        0x8D, 0x14,  # Charge Pump Setting (Enable)
+        0xAF  # Display ON
+    ]
+    for cmd in commands:
+        oled_command(cmd)
 
-def point(x,y):
-    with canvas(device) as draw:
-        draw.point((x,y), fill="white") 
+# def create_canvas():
+#     """描画データを格納する領域(キャンバス)を作成"""
+#     image = Image.new("1", (OLED_WIDTH, OLED_HEIGHT), "black")
+#     draw = ImageDraw.Draw(image)
+#     return image, draw
 
-def line(x1,y1,x2,y2):
-    with canvas(device) as draw:
-        draw.line((x1,y1,x2,y2), fill="white")
+def clear_canvas():
+    """キャンバスをクリア"""
+    draw.rectangle((0, 0, OLED_WIDTH, OLED_HEIGHT), fill=0)
 
-def image(image):
-    # 画像を2値に変換
-    binary_image = image.convert("1")
-    # 画像の描画
-    with canvas(device) as draw:
-        draw.bitmap((0, 0), binary_image, fill="white")
+def clear_oled():
+    """OLED画面をクリア"""
+    oled_command(0x20)  # Horizontal addressing mode
+    for page in range(0, 4):
+        oled_command(0xB0 + page)  # Set page start address
+        oled_command(0x00)  # Set low column start address
+        oled_command(0x10)  # Set high column start address
+        for _ in range(OLED_WIDTH):
+            if page != 0:
+                bus.write_byte_data(OLED_I2C_ADDR, SSD1306_DATA, 0x00)
+    oled_command(0xB0 + 0)  # Set page start address
+    oled_command(0x00)  # Set low column start address
+    oled_command(0x10)  # Set high column start address
+    for _ in range(OLED_WIDTH):
+        bus.write_byte_data(OLED_I2C_ADDR, SSD1306_DATA, 0x00)
 
+def set_font(font_path="DejaVuSans.ttf", size=12):
+    """フォントとフォントサイズを設定"""
+    return ImageFont.truetype(font_path, size)
+
+def disp_oled():
+    """キャンバスの内容をOLEDに表示"""
+    oled_command(0x20)  # Horizontal addressing mode
+    for page in range(0, 4):  # 4ページ (32ピクセル / 8)
+        oled_command(0xB0 + page)  # Set page start address
+        oled_command(0x00)  # Set low column start address
+        oled_command(0x10)  # Set high column start address
+        for x in range(OLED_WIDTH):
+            byte = 0
+            if page != 0:
+                for bit in range(8):  # 各ページ内で8ピクセルを処理
+                    y = page * 8 + bit
+                    if y < OLED_HEIGHT and image.getpixel((x, y)):
+                        byte |= (1 << bit)
+            if page != 0:
+                bus.write_byte_data(OLED_I2C_ADDR, SSD1306_DATA, byte)
+    
+    # ページゼロが転送されないので、再度送る
+    page =0
+    oled_command(0xB0 + page)  # Set page start address
+    # oled_command(0x00)  # Set low column start address
+    # oled_command(0x10)  # Set high column start address
+    for x in range(OLED_WIDTH):
+        byte = 0
+        for bit in range(8):  # 各ページ内で8ピクセルを処理
+            y = page * 8 + bit
+            if y < OLED_HEIGHT and image.getpixel((x, y)):
+                byte |= (1 << bit)
+        bus.write_byte_data(OLED_I2C_ADDR, SSD1306_DATA, byte)
+
+def text( x, y, text, font):
+    """指定された位置にテキストを描画"""
+    draw.text((x, y), text, font=font, fill=255)
+
+def point( x, y):
+    """指定された位置にドットを描画"""
+    draw.point((x, y), fill=255)
+
+def line( x1, y1, x2, y2):
+    """指定された位置に線を描画"""
+    draw.line((x1, y1, x2, y2), fill=255)
+
+def square( x1, y1, x2, y2,set):
+    """指定された位置に四角を描画"""
+    if set == 0:
+        draw.rectangle((x1, y1, x2, y2), outline=255, fill=0)
+    else:
+        draw.rectangle((x1, y1, x2, y2), outline=255, fill=1)
+
+def bitmap_to_image(bitmap_path):
+    """BMPファイルを画像オブジェクトに変換"""
+    img = Image.open(bitmap_path).convert('1')  # 1ビットカラー（白黒画像）
+    img = img.resize((OLED_WIDTH, OLED_HEIGHT))  # サイズをOLEDに合わせる
+    return img
+
+def draw_bitmap( x, y, bitmap_image):
+    """指定された位置にBMP画像を描画"""
+    bitmap_image = bitmap_image.convert('1')  # 白黒に変換
+    for i in range(bitmap_image.width):
+        for j in range(bitmap_image.height):
+            if bitmap_image.getpixel((i, j)) == 255:  # 白い部分を描画
+                draw.point((x + i, y + j), fill=255)
+
+def main():
+    # OLED初期化
+    oled_ini()
+
+    # 描画領域(キャンバス)を作る
+    # image, draw = create_canvas()
+
+    # oledをクリア
+    clear_oled()
+    # 描画領域をクリア
+    clear_canvas()
+
+
+
+    # 四角を描画領域に書く　最後の0で白抜き、1:塗りつぶし
+    square( 0, 0, 127, 31,0)
+    # 描画領域のデータをOLEDに転送
+    disp_oled()
+
+    # 点を書く
+    point(120, 16)
+    # 描画領域のデータをOLEDに転送
+    disp_oled()
+
+    # フォント設定
+    font = set_font("DejaVuSans.ttf", 32)
+
+    # 20,10に16ポイントの文字を書く
+    text( 0, 0, "Hello", font)
+    disp_oled()
+    time.sleep(1)
+    clear_oled()
+    clear_canvas()
+
+    # 30,10,50,30に線を描く
+    line( 30, 10, 50, 30)
+    disp_oled()
+    time.sleep(1)
+
+    # 60,15,80,25に四角を描く
+    square( 0, 14, 127, 31,0)
+    disp_oled()
+    time.sleep(1)
+
+    font = set_font("fonts-japanese-gothic.ttf", 32)
+    text( 0, 0, "Hello", font)
+    disp_oled()
+
+    # BMP画像を読み込み
+    bitmap_image = bitmap_to_image('kingyo.png')
+    # BMP画像を描画
+    draw_bitmap( 0, 0, bitmap_image)
+    # キャンバスをOLEDに表示
+    disp_oled()
+    
+    time.sleep(2)
+    clear_oled()
+    clear_canvas()
+    text( 0, 0, "Hello", font)
+    disp_oled()
+    time.sleep(2)
+    clear_oled()
+
+if __name__ == "__main__":
+    main()
