@@ -1,0 +1,30 @@
+2025/01/24　インストール手順
+
+
+2025/01/24 Bullseye 11.11で確認、Bookworm版12.8にて動作確認
+
+I2cを有効化
+sudo raspi-config
+にてi2cを有効にしてください。
+
+基板を装着した状態で
+i2cdetect -y 1
+とすると、
+OLED 3c
+と表示されます。
+
+ライブラリをインストール
+
+sudo apt-get install fonts-dejavu
+sudo apt-get install fonts-ipafont
+
+
+プログラムをダウンロード
+git clone https://github.com/momorara/OLED_v2 OLED
+
+プログラムのディレクトリ OLED へ移動
+cd OLED
+として、ls
+python3 xxx.py としてサンプルプログラムを試してみてください。 
+
+
