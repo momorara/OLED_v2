@@ -21,22 +21,40 @@ def main():
     line1 = "01234567890123456789"
     line2 = "abcdefghijklmnopqrstu"
     line3 = "ABCDEFGHIJKLMNOPQRSTU"
-    lib_oled.text(line1,line2,line3)
-    time.sleep(3)
+    # OLED初期化
+    lib_oled.oled_ini()
+    # oledをクリア
+    lib_oled.clear_oled()
+    # 描画領域をクリア
+    lib_oled.clear_canvas()
 
-    lib_oled.textTT("テスト",25)
-    time.sleep(3)
+    # フォント設定
+    font = lib_oled.set_font("DejaVuSans.ttf", 10)
+    # テキストをキャンバスに書く
+    lib_oled.text(0,0,line1,font)
+    lib_oled.text(0,11,line2,font)
+    lib_oled.text(0,22,line3,font)
+    # キャンバスの情報をOLEDに転送
+    lib_oled.disp_oled()
+    time.sleep(1)
 
     lib_oled.square(0, 0, 127, 31,0)
-    time.sleep(3)
-    lib_oled.point(50,10)
-    time.sleep(3)
-    lib_oled.line(127, 0, 0, 31)
-    time.sleep(3)
+    lib_oled.disp_oled()
+    time.sleep(1)
 
-    image = Image.open("tonbo.png")
-    lib_oled.image(image)
+    lib_oled.point(50,10)
+    lib_oled.disp_oled()
+    time.sleep(1)
+
+    lib_oled.line(127, 0, 0, 31)
+    lib_oled.disp_oled()
+    time.sleep(1)
+
+    bitmap_image = lib_oled.bitmap_to_image("tonbo.png")
+    lib_oled.draw_bitmap(0, 0, bitmap_image)
+    lib_oled.disp_oled()
     time.sleep(3)
+    lib_oled.clear_oled()
 
 if __name__ == '__main__':
     try:
