@@ -7,7 +7,7 @@
 
 2024/03/03  start
 2024/03/05  5から32ドットの文字を順次表示
-
+2025/01/24  独自ライブラリに対応
 ############################################################################
 """
 
@@ -31,7 +31,7 @@ def main():
     lib_oled.clear_canvas()
     
     for size in range(5,33):
-        font = lib_oled.set_font("DejaVuSans.ttf", size)
+        font = lib_oled.set_font("fonts-japanese-gothic.ttf", size)
         text = str(size) + "ドット"
         if size < 18:
             text = text + "の文字"
