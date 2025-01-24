@@ -35,7 +35,7 @@ luma.coreとluma.oledのインストールが不要となります。<br>
 <h4><<使用方法>></h4>
 git clone https://github.com/momorara/OLED_v2 OLED<br>
 でラズパイにダウンロードしてください。<br>
-以上でインストール完了です。<br>
+インストールについては、インストール文書を見てください。<br>
 bullseye、Bookwormでインストール手順は同じです。
 プログラムは同じもので動作します。
 
