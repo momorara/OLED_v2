@@ -52,3 +52,4 @@ git clone https://github.com/momorara/OLED
 
 <h4><<サポート窓口>></h4>
   メールアドレスは　tkj-works@mbr.nifty.com です。<br>
+  サポートコミュニティー　https://www.facebook.com/groups/3773038759434230<br>
