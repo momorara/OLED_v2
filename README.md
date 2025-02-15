@@ -49,6 +49,7 @@ bullseye、Bookwormでインストール手順は同じです。
 既存のライブラリを使う場合は、
 git clone https://github.com/momorara/OLED
 を見てください。
+2025/2/15 Codespacesにアクセス
 
 <h4><<サポート窓口>></h4>
   メールアドレスは　tkj-works@mbr.nifty.com です。<br>
