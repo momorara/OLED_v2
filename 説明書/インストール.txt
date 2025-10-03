@@ -2,6 +2,7 @@
 
 
 2025/01/24 Bullseye 11.11で確認、Bookworm版12.8にて動作確認
+2025/10/03 Bookworm版12.12で確認、Trixie版13.1にて動作確認
 
 I2cを有効化
 sudo raspi-config
